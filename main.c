@@ -37,17 +37,6 @@ void my_stub_handler(CPUAL* cpual)
     }
 	
     if (bHit) {
-        /*
-		int free;
-		int ret_code;
-        void *vmcpu;
-        void *cpu;
-		void *tmp_ctx;
-        uint64_t *sp_ptr;
-        uint64_t *stack_top;
-		arm64_gpregs *gp;
-		arm64_fpregs *fp;
-		*/
         plugin_msg("%08X %08X %p %p %p %p %p"
 			, cpual->free, cpual->ret_code, cpual->vmcpu, cpual->cpu
 				   , cpual->tmp_ctx, cpual->sp_ptr, cpual->stack_top);

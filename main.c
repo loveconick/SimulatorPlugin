@@ -3,7 +3,7 @@
 //  pluginTest
 //
 //  Created by jia jerry on 2018/3/27.
-//  Copyright Â© 2018å¹?jia.jerry. All rights reserved.
+//  Copyright  jia.jerry. All rights reserved.
 //
 
 #define _PLUGIN
@@ -34,9 +34,12 @@ void my_stub_handler(CPUAL* cpual)
     }else if (cpual->gp->pc == (uint64_t)sysctlbyname) {
         bHit = true;
         plugin_msg("call sysctlbyname(%s), lr %llx", cpual->gp->r[0], cpual->gp->r[30]);
-    }
+	}else if (cpual->gp->pc == (uint64_t)1) {	//objc_msgSend
+		bHit = true;
+		plugin_msg("call fprintf : %s %d", (char *)cpual->gp->r[2], (int)cpual->gp->r[3]);
+	}
 	
-    if (bHit) {
+    /*if (bHit) {
         plugin_msg("%08X %08X %p %p %p %p %p"
 			, cpual->free, cpual->ret_code, cpual->vmcpu, cpual->cpu
 				   , cpual->tmp_ctx, cpual->sp_ptr, cpual->stack_top);
@@ -44,8 +47,7 @@ void my_stub_handler(CPUAL* cpual)
 		for (int i=0; i<31; i++) {
 			plugin_msg("%02d %08X",i,cpual->gp->r[i]);
 		}
-		
-    }
+    }*/
 }
 
 //###################################################
@@ -93,7 +95,4 @@ _export void* module_thread(void *para)
 {
     return NULL;
 }
-
-
-
 

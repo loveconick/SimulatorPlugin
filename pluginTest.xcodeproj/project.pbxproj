@@ -7,13 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5A58F52A207DEA44008609E2 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5A58F529207DEA44008609E2 /* main.m */; };
+		5A58F52A207DEA44008609E2 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5A58F529207DEA44008609E2 /* main.mm */; };
+		5A6D78122085A3C7008AF4AB /* cpplib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5A6D78102085A3C7008AF4AB /* cpplib.cpp */; };
+		5A6D78132085A3C7008AF4AB /* cpplib.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 5A6D78112085A3C7008AF4AB /* cpplib.hpp */; };
 		C4260629206A8F4A000E5542 /* plugin.h in Headers */ = {isa = PBXBuildFile; fileRef = C4260627206A8F4A000E5542 /* plugin.h */; };
 		C426066D206ADE2E000E5542 /* libxosvm.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C426066C206ADE2E000E5542 /* libxosvm.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		5A58F529207DEA44008609E2 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		5A58F529207DEA44008609E2 /* main.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = main.mm; sourceTree = "<group>"; };
+		5A6D78102085A3C7008AF4AB /* cpplib.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = cpplib.cpp; sourceTree = "<group>"; };
+		5A6D78112085A3C7008AF4AB /* cpplib.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = cpplib.hpp; sourceTree = "<group>"; };
 		C426061F206A8F28000E5542 /* libpluginTest.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libpluginTest.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4260627206A8F4A000E5542 /* plugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = plugin.h; sourceTree = "<group>"; };
 		C426066C206ADE2E000E5542 /* libxosvm.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxosvm.dylib; path = lib/libxosvm.dylib; sourceTree = "<group>"; };
@@ -34,7 +38,9 @@
 		C4260616206A8F28000E5542 = {
 			isa = PBXGroup;
 			children = (
-				5A58F529207DEA44008609E2 /* main.m */,
+				5A58F529207DEA44008609E2 /* main.mm */,
+				5A6D78102085A3C7008AF4AB /* cpplib.cpp */,
+				5A6D78112085A3C7008AF4AB /* cpplib.hpp */,
 				C4260627206A8F4A000E5542 /* plugin.h */,
 				C4260620206A8F28000E5542 /* Products */,
 				C4260640206A9CC2000E5542 /* Frameworks */,
@@ -64,6 +70,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5A6D78132085A3C7008AF4AB /* cpplib.hpp in Headers */,
 				C4260629206A8F4A000E5542 /* plugin.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -125,7 +132,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5A58F52A207DEA44008609E2 /* main.m in Sources */,
+				5A58F52A207DEA44008609E2 /* main.mm in Sources */,
+				5A6D78122085A3C7008AF4AB /* cpplib.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

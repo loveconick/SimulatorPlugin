@@ -15,3 +15,8 @@ build/pluginTest.build/Debug-iphonesimulator/pluginTest.build/pluginTest-generat
 build/pluginTest.build/Debug-iphonesimulator/pluginTest.build/pluginTest-own-target-headers.hmap
 build/pluginTest.build/Debug-iphonesimulator/pluginTest.build/pluginTest-project-headers.hmap
 build/pluginTest.build/Debug-iphonesimulator/pluginTest.build/pluginTest.hmap
+*.o
+*.d
+*.dylib
+*.dylib
+*.dat

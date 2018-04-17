@@ -23,7 +23,16 @@ typedef struct {
 }arm64_gpregs;			//general Purpose 寄存器
 
 typedef struct {
-    __uint128_t v[32];
+#if 0
+	__uint128_t v[32];
+#else
+	union
+	{
+		__uint128_t n;
+		long double F;
+		double f;
+	} v[32];
+#endif
     uint32_t fp_status;
     uint32_t std_fp_status;
 }arm64_fpregs;			//float point 寄存器
@@ -53,7 +62,9 @@ typedef struct _CPUAL {
 
 typedef void (*stub_handler_t)(CPUAL* cpual);
 // exported
-extern void plugin_msg(char *, ...);
-extern void register_stub_handler(stub_handler_t handler);
+extern "C" {
+void plugin_msg(char *, ...);
+void register_stub_handler(stub_handler_t handler);
+};
 
 #endif /* main_h */

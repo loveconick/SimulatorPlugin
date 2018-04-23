@@ -35,6 +35,8 @@ typedef struct _FUNC_FILE_ _FUNC_FILE_;
 
 bool loadSrcFunc(void);
 _FUNC_FILE_ *pFindSrcFuncByLR(uint64_t lr);
+
+void PrintCallStack(void);
 //};
 
 #endif /* cpplib_hpp */

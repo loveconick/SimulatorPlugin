@@ -6,6 +6,7 @@
 //  Copyright © 2018年 jia.jerry. All rights reserved.
 //
 
+#include <execinfo.h>
 #include "cpplib.hpp"
 
 
@@ -61,4 +62,20 @@ _FUNC_FILE_ *pFindSrcFuncByLR(uint64_t lr)
 		}
 	}
 	return(NULL);
+}
+
+void PrintCallStack(void)
+{
+	void *array[10] = {0};
+	uint32_t size = 0;
+	char **strframe = NULL;
+	uint32_t i = 0;
+	
+	size = backtrace(array, 10);
+	strframe = (char **)backtrace_symbols(array, size);
+	plugin_msg((char *)"Call Stack:");
+	for(i = 0; i < size; i++)
+	{
+		plugin_msg((char *)"%d -- %s", i, strframe[i]);
+	}
 }

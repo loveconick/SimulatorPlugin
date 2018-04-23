@@ -24,18 +24,19 @@
 
 void PrintRegister(CPUAL* cpual)
 {
-	plugin_msg("0x%016llX 0x%016llX %p %p %p %p %p"
-			   , cpual->free, cpual->ret_code, cpual->vmcpu, cpual->cpu
+	uint32_t threadid = mach_thread_self();
+	/*plugin_msg("%08lx : 0x%016llX 0x%016llX %p %p %p %p %p"
+			   ,threadid , cpual->free, cpual->ret_code, cpual->vmcpu, cpual->cpu
 			   , cpual->tmp_ctx, cpual->sp_ptr, cpual->stack_top);
-	plugin_msg("pc==0x%016llX, lr==0x%016llX , sp==0x%016llX, 0x%016llX"
-			   ,cpual->gp->pc,cpual->gp->r[30],cpual->gp->uc_sp,cpual->gp->sim_sp);
+	plugin_msg("%08lx : pc==0x%016llX, lr==0x%016llX , sp==0x%016llX, 0x%016llX"
+			   ,threadid ,cpual->gp->pc,cpual->gp->r[30],cpual->gp->uc_sp,cpual->gp->sim_sp);*/
 	int i = 0;
 	for (i=0; i<24; i+=8) {
-		plugin_msg("%02d 0x%016llX 0x%016llX 0x%016llX 0x%016llX 0x%016llX 0x%016llX 0x%016llX 0x%016llX",i
+		plugin_msg("%08lx : %02d 0x%016llX 0x%016llX 0x%016llX 0x%016llX 0x%016llX 0x%016llX 0x%016llX 0x%016llX" ,threadid ,i
 				   ,cpual->gp->r[i+0],cpual->gp->r[i+1],cpual->gp->r[i+2],cpual->gp->r[i+3]
 				   ,cpual->gp->r[i+4],cpual->gp->r[i+5],cpual->gp->r[i+6],cpual->gp->r[i+7]);
 	}
-	plugin_msg("%02d 0x%016llX 0x%016llX 0x%016llX 0x%016llX 0x%016llX 0x%016llX 0x%016llX",i
+	plugin_msg("%08lx : %02d 0x%016llX 0x%016llX 0x%016llX 0x%016llX 0x%016llX 0x%016llX 0x%016llX" ,threadid ,i
 			   ,cpual->gp->r[i+0],cpual->gp->r[i+1],cpual->gp->r[i+2],cpual->gp->r[i+3]
 			   ,cpual->gp->r[i+4],cpual->gp->r[i+5],cpual->gp->r[i+6]);
 #if 0
@@ -71,27 +72,38 @@ void my_stub_handler(CPUAL* cpual)
 	//void            *dli_saddr;     /* Address of nearest symbol */
 	Dl_info dlinfo;
 	if(cpual->gp->pc == (uint64_t)objc_msgSend)
-		plugin_msg("%08lx : objc method %s", mach_thread_self(), (char *)cpual->gp->r[1]);
+		plugin_msg("%08lx(lr=%llx) : objc method %s", mach_thread_self(), cpual->gp->r[30], (char *)cpual->gp->r[1]);
 	else{
 		dladdr((const void *)cpual->gp->pc, &dlinfo);
-		plugin_msg("%08lx : %s %s", mach_thread_self(), dlinfo.dli_sname, dlinfo.dli_fname);
+		const char *pFileName = strrchr(dlinfo.dli_fname, '/');
+		if (pFileName==NULL) {
+			pFileName = dlinfo.dli_fname;
+		}
+		else
+		{
+			pFileName++;
+		}
+		plugin_msg("%08lx(lr=%llx) : %s %s", mach_thread_self(), cpual->gp->r[30], dlinfo.dli_sname, pFileName);
 	}
 	_FUNC_FILE_ *pFunc = pFindSrcFuncByLR(cpual->gp->r[30]);
 	if (pFunc!=NULL)
 	{
-		plugin_msg("caller is %s : %u", pFunc->szFileName, pFunc->dwFileLine);
-		PrintRegister(cpual);
+		plugin_msg("%08lx(lr=%llx) : caller is %-20s : %5u : %s", mach_thread_self()
+			, cpual->gp->r[30], pFunc->szFileName, pFunc->dwFileLine, pFunc->szFuncName);
+		//PrintRegister(cpual);
 	}
 	
     //plugin_msg("call stub lr: 0x0x%016llX\n", cpual->gp->r[30]);
     if(cpual->gp->pc == (uint64_t)fopen){
         plugin_msg("call fopen(%s %s)", (char *)cpual->gp->r[0], (char *)cpual->gp->r[1]);
-    }else if (cpual->gp->pc == (uint64_t)sysctlbyname) {
+    }/*else if (cpual->gp->pc == (uint64_t)sysctlbyname) {
         plugin_msg("call sysctlbyname(%s), lr 0x%016llX", cpual->gp->r[0], cpual->gp->r[30]);
-	}else if (cpual->gp->pc == (uint64_t)1) {	//objc_msgSend
+	}else if (cpual->gp->pc == (uint64_t)objc_msgSend) {
 		plugin_msg("call fprintf : %s %d", (char *)cpual->gp->r[2], (int)cpual->gp->r[3]);
-	}
+	}*/
 }
+
+extern "C" {
 
 //###################################################
 _export const char * module_get_title()
@@ -119,7 +131,7 @@ _export int module_init(void)
 {
     //plugin_msg("test module inited\n");
     register_stub_handler(my_stub_handler);
-	//loadSrcFunc();
+	loadSrcFunc();
     return 0;
 }
 
@@ -140,3 +152,4 @@ _export void* module_thread(void *para)
     return NULL;
 }
 
+}

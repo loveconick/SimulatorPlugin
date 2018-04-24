@@ -9,6 +9,7 @@
 #ifndef main_h
 #define main_h
 
+#include "unicorn/unicorn.h"
 
 #ifdef _PLUGIN
 #define _export __attribute__((visibility("default")))
@@ -65,6 +66,8 @@ typedef void (*stub_handler_t)(CPUAL* cpual);
 extern "C" {
 void plugin_msg(const char *, ...);
 void register_stub_handler(stub_handler_t handler);
+typedef void (*unicorn_hookcode_handler_t)(uc_engine *uc, uint64_t address, uint32_t size, void *user_data);
+void register_unicorn_hookcode_handler(unicorn_hookcode_handler_t handler);
 };
 
 #endif /* main_h */

@@ -15,12 +15,48 @@
 #include <dlfcn.h>
 #include <mach/mach.h>
 
+#include <Foundation/Foundation.h>
 //#include <objc/objc-runtime.h>
 #include <objc/runtime.h>
 #include <objc/message.h>
 
 #include "plugin.h"
 #include "cpplib.hpp"
+
+
+int scan_objc_method()
+{
+    uint32_t outCount, methodCnt=0;
+    uint32_t outCountMethod = 0;
+    Class *classes = objc_copyClassList(&outCount);
+    plugin_msg("found classes count %d", outCount);
+    for (int i = 0; i < outCount; i++) {
+        //plugin_msg("%s", class_getName(classes[i]));
+        Method * methods = class_copyMethodList(classes[i], &outCountMethod);
+        for (int j = 0; j < outCountMethod; j++) {
+            Method method = methods[j];
+            SEL methodSEL = method_getName(method);
+            //const char * selName = sel_getName(methodSEL);
+            if (methodSEL) {
+                methodCnt++;
+                //impMap.insert(pair<uint64_t, void *>((uint64_t)method->method_imp, (void *)method));
+                //plugin_msg("[%s %s] -> %llx", class_getName(classes[i]), selName, method->method_imp);
+            }
+        }
+    }
+    free(classes);
+    plugin_msg("found methods count %d", methodCnt);
+    return 0;
+}
+
+int get_program_info(void)
+{
+    NSDictionary *infoDic = [[NSBundle mainBundle] infoDictionary];
+    NSString *bundleIdentifier = infoDic[@"CFBundleIdentifier"];
+    plugin_msg("app [%s] started", [bundleIdentifier UTF8String]);
+    scan_objc_method();
+    return 0;
+}
 
 
 uint64_t g_addr_objc_storeStrong;
@@ -125,6 +161,20 @@ void my_stub_handler(CPUAL* cpual)
 	}*/
 }
 
+void my_hookcode_handler(uc_engine *uc, uint64_t address, uint32_t size, void *user_data)
+{
+    CPUAL *cpual = (CPUAL*)uc_get_userdata(uc);
+    if(0x1000080a4 == address){
+        plugin_msg("0x1000080a4 r0 %llx, r19", cpual->gp->r[0], cpual->gp->r[19]);
+    }else if(0x100008048 == address){
+        uint64_t val = cpual->gp->r[1];
+        uc_reg_write(uc, UC_ARM64_REG_X0, &val);
+        //val = cpual->gp->r[2];
+        //uc_reg_write(uc, UC_ARM64_REG_X1, &val);
+        plugin_msg("0x100008048 set r0 %llx", val);
+    }
+}
+
 extern "C" {
 
 //###################################################
@@ -135,7 +185,7 @@ _export const char * module_get_title()
 
 _export const char * module_get_version()
 {
-    return "0.0.3";
+    return "0.0.5";
 }
 
 _export const char * module_get_author()
@@ -151,8 +201,13 @@ _export const char * module_get_description()
 
 _export int module_init(void)
 {
+    uint32_t a,b;
     //plugin_msg("test module inited\n");
     register_stub_handler(my_stub_handler);
+    register_unicorn_hookcode_handler(my_hookcode_handler);
+    get_program_info();
+    uc_version(&a, &b);
+    plugin_msg("uc version [%d:%d]", a, b);
 	loadSrcFunc();
 	g_addr_objc_storeStrong = (uint64_t)dlsym(RTLD_DEFAULT, "_objc_storeStrong");
 	if (g_addr_objc_storeStrong==0) {

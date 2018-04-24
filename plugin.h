@@ -63,7 +63,7 @@ typedef struct _CPUAL {
 typedef void (*stub_handler_t)(CPUAL* cpual);
 // exported
 extern "C" {
-void plugin_msg(char *, ...);
+void plugin_msg(const char *, ...);
 void register_stub_handler(stub_handler_t handler);
 };
 

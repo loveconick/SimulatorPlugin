@@ -16,10 +16,14 @@
 #include <mach/mach.h>
 
 //#include <objc/objc-runtime.h>
+#include <objc/runtime.h>
 #include <objc/message.h>
 
 #include "plugin.h"
 #include "cpplib.hpp"
+
+
+uint64_t g_addr_objc_storeStrong;
 
 
 void PrintRegister(CPUAL* cpual)
@@ -75,7 +79,11 @@ void my_stub_handler(CPUAL* cpual)
 		plugin_msg("%08lx(lr=%llx) : objc method %s", mach_thread_self(), cpual->gp->r[30], (char *)cpual->gp->r[1]);
 	else{
 		dladdr((const void *)cpual->gp->pc, &dlinfo);
-		const char *pFileName = strrchr(dlinfo.dli_fname, '/');
+		if ((g_addr_objc_storeStrong==0) && (strcmp(dlinfo.dli_sname,"objc_storeStrong")==0)) {
+			g_addr_objc_storeStrong = cpual->gp->pc;
+			plugin_msg((char *)"objc_storeStrong addr = %llx", g_addr_objc_storeStrong);
+		}
+		/*const char *pFileName = strrchr(dlinfo.dli_fname, '/');
 		if (pFileName==NULL) {
 			pFileName = dlinfo.dli_fname;
 		}
@@ -83,7 +91,8 @@ void my_stub_handler(CPUAL* cpual)
 		{
 			pFileName++;
 		}
-		plugin_msg("%08lx(lr=%llx) : %s %s", mach_thread_self(), cpual->gp->r[30], dlinfo.dli_sname, pFileName);
+		plugin_msg("%08lx(lr=%llx) : %s %s", mach_thread_self(), cpual->gp->r[30], dlinfo.dli_sname, pFileName);*/
+		plugin_msg("%08lx(lr=%llx) : %s %s", mach_thread_self(), cpual->gp->r[30], dlinfo.dli_sname, dlinfo.dli_fname);
 	}
 	_FUNC_FILE_ *pFunc = pFindSrcFuncByLR(cpual->gp->r[30]);
 	if (pFunc!=NULL)
@@ -96,7 +105,20 @@ void my_stub_handler(CPUAL* cpual)
     //plugin_msg("call stub lr: 0x0x%016llX\n", cpual->gp->r[30]);
     if(cpual->gp->pc == (uint64_t)fopen){
         plugin_msg("call fopen(%s %s)", (char *)cpual->gp->r[0], (char *)cpual->gp->r[1]);
-    }/*else if (cpual->gp->pc == (uint64_t)sysctlbyname) {
+	}else if (cpual->gp->pc == g_addr_objc_storeStrong) {
+		plugin_msg("objc_storeStrong param : %llx %llx ", cpual->gp->r[0], cpual->gp->r[1]);
+		//void objc_storeStrong(id *location, id obj)
+		/*union
+		 {
+		 id *p;
+		 uint64_t u;
+		 } union_idp_u;*/
+		//plugin_msg("%llx %@", cpual->gp->r[0], (id *)cpual->gp->r[0]);
+		if (cpual->gp->r[30]==(uint64_t)0x100091bb8)
+		{
+			cpual->gp->r[1] = 0;
+		}
+	}/*else if (cpual->gp->pc == (uint64_t)sysctlbyname) {
         plugin_msg("call sysctlbyname(%s), lr 0x%016llX", cpual->gp->r[0], cpual->gp->r[30]);
 	}else if (cpual->gp->pc == (uint64_t)objc_msgSend) {
 		plugin_msg("call fprintf : %s %d", (char *)cpual->gp->r[2], (int)cpual->gp->r[3]);
@@ -132,6 +154,10 @@ _export int module_init(void)
     //plugin_msg("test module inited\n");
     register_stub_handler(my_stub_handler);
 	loadSrcFunc();
+	g_addr_objc_storeStrong = (uint64_t)dlsym(RTLD_DEFAULT, "_objc_storeStrong");
+	if (g_addr_objc_storeStrong==0) {
+		plugin_msg((char *)"%s",dlerror());
+	}
     return 0;
 }
 

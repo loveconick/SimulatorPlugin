@@ -166,12 +166,13 @@ void my_hookcode_handler(uc_engine *uc, uint64_t address, uint32_t size, void *u
     CPUAL *cpual = (CPUAL*)uc_get_userdata(uc);
     if(0x1000080a4 == address){
         plugin_msg("0x1000080a4 r0 %llx, r19", cpual->gp->r[0], cpual->gp->r[19]);
-    }else if(0x100008048 == address){
-        uint64_t val = cpual->gp->r[1];
-        uc_reg_write(uc, UC_ARM64_REG_X0, &val);
+    }else if(0x100007f50 == address){
+        //uint64_t val = cpual->gp->r[1];
+		//需要使用uc_reg_write进行内核寄存器设置，不能直接cpual->gp->r[0]=cpual->gp->r[1];可能是因为cpual指向的地址只是内核寄存器的一个拷贝
+        //uc_reg_write(uc, UC_ARM64_REG_X0, &val);
         //val = cpual->gp->r[2];
         //uc_reg_write(uc, UC_ARM64_REG_X1, &val);
-        plugin_msg("0x100008048 set r0 %llx", val);
+        //plugin_msg("0x100007f50 set r0 %llx", val);
     }
 }
 

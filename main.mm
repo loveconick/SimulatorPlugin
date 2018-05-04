@@ -70,6 +70,8 @@ void PrintRegister(CPUAL* cpual)
 			   , cpual->tmp_ctx, cpual->sp_ptr, cpual->stack_top);
 	plugin_msg("%08lx : pc==0x%016llX, lr==0x%016llX , sp==0x%016llX, 0x%016llX"
 			   ,threadid ,cpual->gp->pc,cpual->gp->r[30],cpual->gp->uc_sp,cpual->gp->sim_sp);*/
+	plugin_msg("%08lx : pc==0x%016llX, lr==0x%016llX , sp==0x%016llX, 0x%016llX"
+			   ,threadid ,cpual->gp->pc,cpual->gp->r[30],cpual->gp->uc_sp,cpual->gp->sim_sp);
 	int i = 0;
 	for (i=0; i<24; i+=8) {
 		plugin_msg("%08lx : %02d 0x%016llX 0x%016llX 0x%016llX 0x%016llX 0x%016llX 0x%016llX 0x%016llX 0x%016llX" ,threadid ,i
@@ -150,10 +152,10 @@ void my_stub_handler(CPUAL* cpual)
 		 uint64_t u;
 		 } union_idp_u;*/
 		//plugin_msg("%llx %@", cpual->gp->r[0], (id *)cpual->gp->r[0]);
-		if (cpual->gp->r[30]==(uint64_t)0x100091bb8)
+		/*if (cpual->gp->r[30]==(uint64_t)0x100091bb8)
 		{
 			cpual->gp->r[1] = 0;
-		}
+		}*/
 	}/*else if (cpual->gp->pc == (uint64_t)sysctlbyname) {
         plugin_msg("call sysctlbyname(%s), lr 0x%016llX", cpual->gp->r[0], cpual->gp->r[30]);
 	}else if (cpual->gp->pc == (uint64_t)objc_msgSend) {
@@ -173,7 +175,9 @@ void my_hookcode_handler(uc_engine *uc, uint64_t address, uint32_t size, void *u
         //val = cpual->gp->r[2];
         //uc_reg_write(uc, UC_ARM64_REG_X1, &val);
         //plugin_msg("0x100007f50 set r0 %llx", val);
-    }
+	}else if((address==0x100054a24) || (address==0x100054a44) || (address==0x100054a78)){
+		PrintRegister(cpual);
+	}
 }
 
 extern "C" {
